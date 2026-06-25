@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MN DUSAMORE — Dashboard Financiero</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --navy:#0A2342;--navy2:#0D2D4F;--blue:#1565C0;--blue2:#1976D2;
+    --orange:#E65100;--green:#1B5E20;--green2:#2E7D32;
+    --yellow:#F57F17;--red:#B71C1C;--gray:#F1F5F9;--gray2:#E2E8F0;
+    --text:#1E293B;--text2:#475569;--white:#fff;--card:#fff;--border:#E2E8F0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:#EEF2F7;color:var(--text);font-size:14px}
+  .header{background:linear-gradient(135deg,var(--navy) 0%,#1a3a5c 100%);color:white;padding:18px 28px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 20px rgba(0,0,0,.35);position:sticky;top:0;z-index:100}
+  .header-left{display:flex;align-items:center;gap:14px}
+  .header-icon{font-size:32px}
+  .header-title h1{font-size:20px;font-weight:700;letter-spacing:.5px}
+  .header-title p{font-size:12px;opacity:.75;margin-top:2px}
+  .header-badge{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:5px 14px;font-size:11px;font-weight:600;letter-spacing:.5px}
+  .tabs{background:var(--navy2);padding:0 28px;display:flex;gap:2px;overflow-x:auto}
+  .tab{padding:13px 20px;color:rgba(255,255,255,.6);font-size:13px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:all .2s;user-select:none}
+  .tab:hover{color:rgba(255,255,255,.9);background:rgba(255,255,255,.06)}
+  .tab.active{color:white;border-bottom-color:#4FC3F7;background:rgba(255,255,255,.08)}
+  .content{padding:24px 28px;max-width:1400px;margin:0 auto}
+  .section{display:none}
+  .section.active{display:block}
+  .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+  .kpi{background:var(--card);border-radius:12px;padding:20px 22px;box-shadow:0 1px 6px rgba(0,0,0,.08);border-top:4px solid var(--blue)}
+  .kpi.orange{border-top-color:var(--orange)}
+  .kpi.green{border-top-color:var(--green2)}
+  .kpi.yellow{border-top-color:var(--yellow)}
+  .kpi.red{border-top-color:var(--red)}
+  .kpi-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--text2);margin-bottom:8px}
+  .kpi-value{font-size:22px;font-weight:800;color:var(--text);line-height:1.1}
+  .kpi-sub{font-size:11px;color:var(--text2);margin-top:6px}
+  .kpi-pct{display:inline-block;margin-top:8px;font-size:12px;font-weight:700;padding:2px 10px;border-radius:12px;background:var(--gray2)}
+  .kpi-pct.ok{background:#E8F5E9;color:var(--green2)}
+  .kpi-pct.warn{background:#FFF3E0;color:var(--orange)}
+  .kpi-pct.low{background:#FFEBEE;color:var(--red)}
+  .kpi.teal{border-top-color:#00838F}
+  .kpi.purple{border-top-color:#7B1FA2}
+  .super-kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px}
+  @media(max-width:700px){.super-kpi-grid{grid-template-columns:1fr}}
+  .super-kpi{border-radius:16px;padding:32px 34px;box-shadow:0 6px 28px rgba(0,0,0,.22);color:white;position:relative;overflow:hidden}
+  .super-kpi::before{content:\'\';position:absolute;right:-30px;top:-30px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.07)}
+  .super-kpi.presupuestado{background:linear-gradient(135deg,#0A2342 0%,#1565C0 100%)}
+  .super-kpi.ejecutado{background:linear-gradient(135deg,#4A148C 0%,#E65100 100%)}
+  .super-kpi-icon{font-size:46px;position:absolute;right:26px;top:22px;opacity:.18}
+  .super-kpi-label{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;opacity:.85;margin-bottom:14px}
+  .super-kpi-value{font-size:38px;font-weight:900;letter-spacing:-.5px;line-height:1.1}
+  .super-kpi-formula{font-size:11px;opacity:.62;margin-top:12px;line-height:1.6}
+  .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px}
+  @media(max-width:900px){.charts-row{grid-template-columns:1fr}}
+  .card{background:var(--card);border-radius:12px;padding:20px;box-shadow:0 1px 6px rgba(0,0,0,.08)}
+  .card h3{font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:16px}
+  .chart-wrap{position:relative;height:240px}
+  .chart-wrap.tall{height:320px}
+  .prog-item{margin-bottom:14px}
+  .prog-header{display:flex;justify-content:space-between;margin-bottom:5px;font-size:12px}
+  .prog-label{font-weight:600;color:var(--text)}
+  .prog-pct{font-weight:700;color:var(--blue)}
+  .prog-bar{height:10px;background:var(--gray2);border-radius:6px;overflow:hidden}
+  .prog-fill{height:100%;border-radius:6px}
+  .prog-detail{font-size:11px;color:var(--text2);margin-top:3px}
+  .abono-grid{display:grid;gap:12px}
+  .abono-card{background:var(--gray);border-radius:10px;padding:16px;border-left:5px solid var(--blue)}
+  .abono-card.done{border-left-color:var(--green2);background:#F1F8F1}
+  .abono-card.partial{border-left-color:var(--yellow);background:#FFFBF0}
+  .abono-card.pending{border-left-color:#78909C}
+  .abono-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+  .abono-name{font-weight:700;font-size:14px}
+  .abono-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+  .badge-done{background:#E8F5E9;color:var(--green2)}
+  .badge-partial{background:#FFF8E1;color:#F57F17}
+  .badge-pending{background:#ECEFF1;color:#546E7A}
+  .abono-numbers{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px}
+  .abono-num{text-align:center}
+  .abono-num .lbl{font-size:10px;color:var(--text2);text-transform:uppercase;font-weight:700}
+  .abono-num .val{font-size:13px;font-weight:800;margin-top:2px}
+  .val.comprometido{color:var(--text)}
+  .val.pagado{color:var(--green2)}
+  .val.pendiente{color:var(--red)}
+  .table-controls{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+  .search-box{flex:1;min-width:200px;padding:9px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;outline:none}
+  .search-box:focus{border-color:var(--blue)}
+  select.filter{padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;outline:none;background:white;cursor:pointer}
+  .table-wrap{overflow-x:auto;border-radius:10px;box-shadow:0 1px 6px rgba(0,0,0,.08)}
+  table{width:100%;border-collapse:collapse;background:white;font-size:12.5px}
+  th{background:var(--navy);color:white;padding:11px 13px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+  td{padding:10px 13px;border-bottom:1px solid var(--gray2);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:#F8FAFC}
+  .estado-pill{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap}
+  .ep-pendiente{background:#ECEFF1;color:#546E7A}
+  .ep-aprobado{background:#E3F2FD;color:#1565C0}
+  .ep-ejecucion{background:#FFF3E0;color:#E65100}
+  .ep-ejecutado{background:#E8F5E9;color:#2E7D32}
+  .tipo-chip{display:inline-block;background:var(--gray2);color:var(--text2);padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600}
+  .table-footer{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:var(--gray);border-radius:0 0 10px 10px;font-size:12px;color:var(--text2)}
+  .rows-count{font-weight:700;color:var(--text)}
+  .costo-item{display:flex;align-items:center;padding:13px 16px;background:white;border-radius:8px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+  .costo-dot{width:12px;height:12px;border-radius:50%;margin-right:14px;flex-shrink:0}
+  .costo-nombre{flex:1;font-weight:600}
+  .costo-obs{font-size:11px;color:var(--text2);margin-top:2px}
+  .costo-valor{font-size:15px;font-weight:800;color:var(--navy)}
+  .costo-total-bar{background:linear-gradient(135deg,var(--navy),var(--blue));color:white;border-radius:12px;padding:18px 22px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;box-shadow:0 4px 16px rgba(10,35,66,.3)}
+  .costo-total-bar .lbl{font-size:12px;opacity:.8;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+  .costo-total-bar .val{font-size:28px;font-weight:900}
+  .costo-total-bar .sub{font-size:11px;opacity:.7;margin-top:3px}
+  .pago-log{background:white;border-radius:10px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.08)}
+  .pago-row{display:grid;grid-template-columns:36px 1fr 1fr auto;gap:12px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--gray2)}
+  .pago-row:last-child{border-bottom:none}
+  .pago-num{width:28px;height:28px;border-radius:50%;background:var(--navy);color:white;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center}
+  .pago-concepto{font-size:12px;font-weight:600}
+  .pago-beneficiario{font-size:11px;color:var(--text2)}
+  .pago-fecha{font-size:11px;color:var(--text2)}
+  .pago-monto{font-size:14px;font-weight:800;color:var(--green2);text-align:right;white-space:nowrap}
+  .pago-metodo{font-size:10px;color:var(--text2);text-align:right}
+  .divider{height:1px;background:var(--border);margin:20px 0}
+  .section-title{font-size:16px;font-weight:800;color:var(--navy);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+  .section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+  .highlight-box{background:linear-gradient(135deg,#E3F2FD,#BBDEFB);border:1.5px solid #90CAF9;border-radius:10px;padding:14px 18px;margin-bottom:20px}
+  .highlight-box .hl-title{font-weight:800;color:var(--navy);font-size:13px;margin-bottom:6px}
+  .highlight-box .hl-text{font-size:12px;color:var(--text2);line-height:1.6}
+  .desc-short{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:help}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-left">
+    <span class="header-icon">⚓</span>
+    <div class="header-title">
+      <h1>MN DUSAMORE</h1>
+      <p>Azimut 42 Fly 2016 · Control Financiero · Cartagena 2026</p>
+    </div>
+  </div>
+  <div style="text-align:right">
+    <div class="header-badge">📊 DASHBOARD EJECUTIVO</div>
+    <div style="font-size:11px;opacity:.6;margin-top:6px" id="fecha-hoy"></div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('resumen',this)">📊 Resumen</div>
+  <div class="tab" onclick="showTab('compra',this)">🏦 Compra Yate</div>
+  <div class="tab" onclick="showTab('trabajos',this)">🔧 Trabajos</div>
+  <div class="tab" onclick="showTab('costos',this)">💰 Costos Fijos</div>
+</div>
+
+<div class="content">
+
+<!-- RESUMEN -->
+<div id="sec-resumen" class="section active">
+  <!-- SUPER INDICADORES -->
+  <div class="super-kpi-grid">
+    <div class="super-kpi presupuestado">
+      <span class="super-kpi-icon">📊</span>
+      <div class="super-kpi-label">🏗️ Total Presupuestado</div>
+      <div class="super-kpi-value" id="super-presupuestado">—</div>
+      <div class="super-kpi-formula">Compra comprometida + Presupuesto trabajos</div>
+    </div>
+    <div class="super-kpi ejecutado">
+      <span class="super-kpi-icon">⚡</span>
+      <div class="super-kpi-label">🚀 Total Ejecutado / Comprometido</div>
+      <div class="super-kpi-value" id="super-ejecutado">—</div>
+      <div class="super-kpi-formula">Compra + Aprobados + En Ejecución + Ejecutados</div>
+    </div>
+  </div>
+  <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#64748B;margin-bottom:10px">COMPRA DEL YATE</div>
+  <div class="kpi-grid">
+    <div class="kpi orange"><div class="kpi-label">💲 Precio Total Comprometido</div><div class="kpi-value">$686.000.000</div><div class="kpi-sub">Yate $680M + DIMAR $6M</div></div>
+    <div class="kpi green"><div class="kpi-label">✅ Pagado a la Fecha</div><div class="kpi-value">$80.565.000</div><div class="kpi-pct warn">12% del total</div></div>
+    <div class="kpi red"><div class="kpi-label">⏳ Pendiente de Pago</div><div class="kpi-value">$605.435.000</div><div class="kpi-sub">3 cuotas por completar</div></div>
+    <div class="kpi"><div class="kpi-label">📈 Avance Compra</div><div class="kpi-value">12%</div><div class="prog-bar" style="margin-top:10px"><div class="prog-fill" style="width:12%;background:#E65100"></div></div></div>
+  </div>
+  <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#64748B;margin-bottom:10px;margin-top:8px">TRABAJOS & REMODELACIÓN</div>
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">🔧 Presupuesto Trabajos</div><div class="kpi-value">$328.250.000</div><div class="kpi-sub">Total estimado del proyecto</div></div>
+    <div class="kpi yellow"><div class="kpi-label">📋 Aprobado</div><div class="kpi-value">$121.454.973</div><div class="kpi-pct warn">38% del presupuesto</div></div>
+    <div class="kpi green"><div class="kpi-label">⚡ Ejecutado (pagado)</div><div class="kpi-value">$3.526.523</div><div class="kpi-pct ok">4% de lo aprobado</div></div>
+    <div class="kpi teal"><div class="kpi-label">🔄 En Ejecución</div><div class="kpi-value" id="kpi-val-ejecucion">—</div><div class="kpi-sub">Trabajos activos actualmente</div></div>
+    <div class="kpi purple"><div class="kpi-label">⏳ Pendientes</div><div class="kpi-value" id="kpi-val-pendiente">—</div><div class="kpi-sub">Por ejecutar / cotizar</div></div>
+    <div class="kpi orange"><div class="kpi-label">💰 Costos Fijos / Mes</div><div class="kpi-value">$15.075.435</div><div class="kpi-sub">Marina + Piloto + Seguros + Admin</div></div>
+  </div>
+  <div class="charts-row">
+    <div class="card"><h3>🔄 Trabajos por Estado</h3><div class="chart-wrap"><canvas id="chartEstado"></canvas></div></div>
+    <div class="card"><h3>🏗️ Presupuesto por Tipo de Trabajo</h3><div class="chart-wrap"><canvas id="chartTipo"></canvas></div></div>
+  </div>
+  <div class="charts-row">
+    <div class="card">
+      <h3>📅 Avance Global del Proyecto</h3>
+      <div style="margin-bottom:14px">
+        <div class="prog-item"><div class="prog-header"><span class="prog-label">Compra del Yate</span><span class="prog-pct">12%</span></div><div class="prog-bar"><div class="prog-fill" style="width:12%;background:#E65100"></div></div><div class="prog-detail">$80.565.000 pagados de $686.000.000</div></div>
+        <div class="prog-item"><div class="prog-header"><span class="prog-label">Trabajos Aprobados</span><span class="prog-pct">42%</span></div><div class="prog-bar"><div class="prog-fill" style="width:42%;background:#1565C0"></div></div><div class="prog-detail">$121.454.973 aprobados de $328.250.000</div></div>
+        <div class="prog-item"><div class="prog-header"><span class="prog-label">Trabajos Ejecutados</span><span class="prog-pct">5%</span></div><div class="prog-bar"><div class="prog-fill" style="width:5%;background:#2E7D32"></div></div><div class="prog-detail">$5.977.000 ejecutados de $123.905.000 aprobados</div></div>
+      </div>
+    </div>
+    <div class="card"><h3>💸 Distribución Inversión Total Proyecto</h3><div class="chart-wrap"><canvas id="chartInversion"></canvas></div></div>
+  </div>
+</div>
+
+<!-- COMPRA YATE -->
+<div id="sec-compra" class="section">
+  <div class="highlight-box">
+    <div class="hl-title">🏦 Control de Pagos — Compra MN DUSAMORE</div>
+    <div class="hl-text">Precio pactado: <strong>$680.000.000 COP</strong> + Permiso DIMAR $6.000.000 = <strong>$686.000.000 total comprometido</strong>. Vendedor: José Micolta Cabrera. HIN: AZB42022A616.</div>
+  </div>
+  <div class="section-title">Cuotas Pactadas</div>
+  <div class="abono-grid" id="abono-grid"></div>
+  <div class="divider"></div>
+  <div class="section-title">Registro de Desembolsos</div>
+  <div class="pago-log">
+    <div style="background:var(--gray);padding:10px 16px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);display:grid;grid-template-columns:36px 1fr 1fr auto;gap:12px">
+      <span>#</span><span>Concepto / Beneficiario</span><span>Fecha · Método</span><span>Monto</span>
+    </div>
+    <div class="pago-row"><div class="pago-num">1</div><div><div class="pago-concepto">Anticipo — Abono 1</div><div class="pago-beneficiario">Efectivo a Jorge Betancurt</div></div><div><div class="pago-fecha">29/05/2026</div><div class="pago-metodo">💵 Efectivo</div></div><div><div class="pago-monto">$50.000.000</div><div class="pago-metodo">✅ Completado</div></div></div>
+    <div class="pago-row"><div class="pago-num">2</div><div><div class="pago-concepto">2do Abono — Pago parcial (Abanderamiento Polonia)</div><div class="pago-beneficiario">ORENDA PARADISE S.A.S. — Bcolombia Cta 08500022443 (Abogada Fallon)</div></div><div><div class="pago-fecha">22/05/2026</div><div class="pago-metodo">🏦 Transferencia</div></div><div><div class="pago-monto">$18.565.000</div><div class="pago-metodo">🟡 Parcial</div></div></div>
+    <div class="pago-row"><div class="pago-num">3</div><div><div class="pago-concepto">3er Abono — Pago parcial</div><div class="pago-beneficiario">Always Luxury Experiences S.A.S. — Bcolombia Cta 09800000161</div></div><div><div class="pago-fecha">22/05/2026</div><div class="pago-metodo">🏦 Transferencia</div></div><div><div class="pago-monto">$12.000.000</div><div class="pago-metodo">🟡 Parcial</div></div></div>
+    <div style="background:#1B5E20;color:white;padding:12px 16px;display:flex;justify-content:space-between;align-items:center"><span style="font-weight:700;font-size:13px">TOTAL DESEMBOLSADO</span><span style="font-size:18px;font-weight:900">$80.565.000</span></div>
+  </div>
+  <div style="margin-top:20px" class="card"><h3>📊 Comprometido vs Pagado por Cuota</h3><div class="chart-wrap"><canvas id="chartAbonos"></canvas></div></div>
+</div>
+
+<!-- TRABAJOS -->
+<div id="sec-trabajos" class="section">
+  <div class="kpi-grid" style="margin-bottom:20px">
+    <div class="kpi"><div class="kpi-label">📋 Total ítems</div><div class="kpi-value">29</div></div>
+    <div class="kpi green"><div class="kpi-label">⚡ Ejecutados</div><div class="kpi-value" id="cnt-ejecutado">—</div></div>
+    <div class="kpi orange"><div class="kpi-label">🔄 En Ejecución</div><div class="kpi-value" id="cnt-ejecucion">—</div></div>
+    <div class="kpi yellow"><div class="kpi-label">✅ Aprobados</div><div class="kpi-value" id="cnt-aprobado">—</div></div>
+    <div class="kpi"><div class="kpi-label">⏳ Pendientes</div><div class="kpi-value" id="cnt-pendiente">—</div></div>
+  </div>
+  <div class="table-controls">
+    <input class="search-box" type="text" id="search-works" placeholder="🔍  Buscar proveedor, descripción, tipo..." oninput="filterTable()">
+    <select class="filter" id="filter-estado" onchange="filterTable()"><option value="">Todos los estados</option><option>Ejecutado</option><option>En Ejecución</option><option>Aprobado</option><option>Pendiente</option></select>
+    <select class="filter" id="filter-tipo" onchange="filterTable()"><option value="">Todos los tipos</option><option>Motor — Rectificación</option><option>Motor — Repuestos</option><option>Mecánica — Sistemas</option><option>Tapicería — Acabados</option><option>Estructura / Casco</option><option>Eléctrico</option><option>Plomería — Sistemas Agua</option><option>Climatización</option><option>Costos Fijos Mensuales</option><option>Aseo</option><option>Compras varias</option><option>Otro</option></select>
+    <select class="filter" id="filter-fase" onchange="filterTable()"><option value="">Todas las fases</option><option>Fase 1</option><option>Fase 2</option><option>Fase 3</option></select>
+  </div>
+  <div class="table-wrap">
+    <table id="works-table">
+      <thead><tr><th>#</th><th>Proveedor</th><th>Tipo</th><th>Descripción</th><th>Fase</th><th>Total c/IVA</th><th>Abonado</th><th>Saldo</th><th>Estado</th></tr></thead>
+      <tbody id="works-body"></tbody>
+    </table>
+    <div class="table-footer"><span>Mostrando <span class="rows-count" id="rows-showing">—</span> ítems</span><span id="total-filtrado" style="font-weight:700;color:var(--navy)">—</span></div>
+  </div>
+</div>
+
+<!-- COSTOS FIJOS -->
+<div id="sec-costos" class="section">
+  <div class="costo-total-bar">
+    <div><div class="lbl">Costo Fijo Total Mensual</div><div class="val">$15.075.435</div><div class="sub">Marina + Piloto + Fondo Mant. + Seguro + Admin</div></div>
+    <div style="text-align:right"><div class="lbl">Anualizado (12 meses)</div><div class="val">$180.905.220</div><div class="sub">Proyección sin incrementos</div></div>
+  </div>
+  <div class="charts-row">
+    <div>
+      <div class="section-title">Desglose Mensual</div>
+      <div id="costos-list"></div>
+      <div style="background:#F1F5F9;border-radius:8px;padding:12px 16px;margin-top:8px;font-size:12px;color:#64748B;line-height:1.7">
+        <strong>Marina:</strong> Arriendo puesto + servicios (desde 26 may 2026)<br>
+        <strong>Piloto:</strong> Salario + prestaciones Decreto 1469/2025 — 42% overhead<br>
+        <strong>Fondo Mantenimiento:</strong> Reserva preventivos y correctivos<br>
+        <strong>Seguro:</strong> Póliza casco + maquinaria + RC prorrateada<br>
+        <strong>Administración:</strong> Always Luxury Experiences S.A.S.
+      </div>
+    </div>
+    <div class="card"><h3>🥧 Distribución Costos Fijos</h3><div class="chart-wrap tall"><canvas id="chartCostos"></canvas></div></div>
+  </div>
+  <div class="card" style="margin-top:18px"><h3>📅 Proyección Acumulada 12 Meses</h3><div class="chart-wrap tall"><canvas id="chartProyeccion"></canvas></div></div>
+</div>
+
+</div>
+
+<script>
+const WORKS=[
+{n:1,proveedor:'Almacén y Rectificadora La Heroica',tipo:'Motor — Rectificación',desc:'Rectificación completa motor Cummins QSB 5.9: encamisar bloque x6, rectificar cigüeñal 10x10, ajuste bancada y biela, sentar válvulas x24, rectificar culata, bujes leva y biela, guías y asientos válvulas x24, lavado motor, prueba hidrostática, suministro 6 camisas. Mano de obra incluida. IVA incluido en total.',total:8294300,abonado:0,saldo:8294300,estado:'Aprobado',fase:'Fase 1'},
+{n:2,proveedor:'Diomedez Conde Hernández',tipo:'Motor — Repuestos',desc:'Repuestos motor Cummins QSB 5.9 (1 motor): 6 camisas, 6 pistones STD, 6 anillos STD, casquetes biela x6 y bancada x7, empaquetaduras superior e inferior, bujes leva x2 y biela x6, válvulas admisión x12 y escape x12, guías x24, asientos x24, bomba de agua, bomba de aceite, 6 inyectores.',total:25846150,abonado:26000000,saldo:-153850,estado:'En Ejecución',fase:'Fase 1'},
+{n:3,proveedor:'Diomedez Conde Hernández',tipo:'Motor — Repuestos',desc:'MANO OBRA + bodegaje',total:6000000,abonado:0,saldo:6000000,estado:'Aprobado',fase:'Fase 1'},
+{n:4,proveedor:'REEMPLAZO INYECTORES - Diomedez Conde Hernández',tipo:'Motor — Repuestos',desc:'Compra todos los inyectores (12 inyectores)',total:19440000,abonado:0,saldo:19440000,estado:'Aprobado',fase:'Fase 1'},
+{n:5,proveedor:'PUESTA EN MARCHA MOTOR ESTRIBOR - Diomedez Conde Hernández',tipo:'Motor — Repuestos',desc:'Puesta en marcha motor estribor, incluye aceite, componentes, todo lo necesario para ponerlo en marcha',total:15000000,abonado:0,saldo:15000000,estado:'Pendiente',fase:'Fase 1'},
+{n:6,proveedor:'OVERHAUL CUARTO MAQUINAS - Diomedez Conde Hernández',tipo:'Motor — Repuestos',desc:'Organizacion, limpueza profunda, pintura, overhaul cuarto maquinas, motores, generador, todos los componentes',total:5000000,abonado:0,saldo:5000000,estado:'Pendiente',fase:'Fase 1'},
+{n:7,proveedor:'Erik David Cedeño P.',tipo:'Mecánica — Sistemas',desc:'Reparación winche cadena ancla popa: reemplazo corona bronce SAE63, 5 rodamientos nuevos, rosca y pernos, limpieza general, aceite de transmisión, 4 retenedores bitón. Mano de obra y materiales incluidos.',total:2800000,abonado:1400000,saldo:1400000,estado:'En Ejecución',fase:'Fase 1'},
+{n:8,proveedor:'Ariel Torres Cancios',tipo:'Tapicería — Acabados',desc:'Retapizado completo camarote principal y secundario (22 mts cuero Sanders): quitar tapizado existente, acondicionar superficies, tapizar nuevamente. Arreglo cenefa tapizada del salón, reparación cubierta de popa, trabajos carpintería popa. Materiales y mano de obra incluidos.',total:6470000,abonado:5000000,saldo:1470000,estado:'En Ejecución',fase:'Fase 1'},
+{n:9,proveedor:'Ariel Torres Cancios',tipo:'Tapicería — Acabados',desc:'PENDIENTE POR COTIZAR TRABAJOS ADICIONALES (ARIEL) - Pulida y mantenimiento TEKA popa, escaletas, mesa Fly y plataforma - Quitada de todos los vidrios y volver a instalar bien, con sikaflex y cauchos nuevos. - Arreglo escotillas laterales batientes - Cambio escotilla delantera PROA, incluye accesorios. - Arreglo de la instalación cojines asoleadoras PROA - Limpieza y pulida todo lo de acero Inoxidable - Arreglo detalles madera interiores (mesa, muebles, etc) - Cambio Espejos cuarto - lona techo flybridge (Color gris o beige claro o blanco) - Polarizado de toda la ventaneria - Colchon cuarto principal - Colchones 2do cuarto - Forro Vidrio Delantero',total:20000000,abonado:0,saldo:20000000,estado:'Pendiente',fase:'Fase 1'},
+{n:10,proveedor:'ASTILLERO SOFIMAR CARTAGENA SAS',tipo:'Costos Fijos Mensuales',desc:'Pago Mes JUN 2026 Astillero marina (desde 28may2026 hasta 27 jun 2026)',total:0,abonado:2450000,saldo:-2450000,estado:'Ejecutado',fase:'Fase 1'},
+{n:11,proveedor:'FIBRRA Y PINTURA LEONARDO',tipo:'Estructura / Casco',desc:'Pintura, polichada y arreglo detalles todo el casco, interiores, proa, popa, flybridge',total:13500000,abonado:4000000,saldo:9500000,estado:'En Ejecución',fase:'Fase 1'},
+{n:12,proveedor:'ALFOMBRAS Y TAPIZADO',tipo:'Tapicería — Acabados',desc:'ALFOMBRAS Y TAPIZADO - Alfombras sala - Alfombras escaleras - Alfombras cuarto principal y laterales - Alfombras 2do cuarto',total:10000000,abonado:0,saldo:10000000,estado:'Pendiente',fase:'Fase 1'},
+{n:13,proveedor:'TAPIZADO TODOS LOS MUEBLES',tipo:'Tapicería — Acabados',desc:'TAPIZADO TODOS LOS MUEBLES - Tapizado y ampliación mueble POPA - Tapizado muebles Sala - Tapizado sillas (2) Capitan - Tapizado Timon Flybridge - Tapizado Muebles Flybridge - Tapizado Asoleadoras PROA',total:20000000,abonado:0,saldo:20000000,estado:'Pendiente',fase:'Fase 2'},
+{n:14,proveedor:'TRABAJOS ELECTRICOS - Electricos y Electronicos SAS (ARNOL OROZCO)',tipo:'Eléctrico',desc:'ELECTRICO - revisar todo el sistema eléctrico, tablero principal, luces. - revisar bounding (aterrizar todo el yate incluido instalación de ánodos) - mantenimiento a generador eléctrico - arreglo sistema eléctrico de ingreso de energía del exterior. - Organización todo sistema eléctrico completo, incluye cuarto de maquinas.',total:23324000,abonado:7000000,saldo:16324000,estado:'En Ejecución',fase:'Fase 1'},
+{n:15,proveedor:'TRABAJOS ELECTRICOS - Compra de repuestos electricos a demanda',tipo:'Eléctrico',desc:'ELECTRICO - pasar motores a manuales y revisión de su sistema eléctrico - revisar todo el sistema eléctrico, tablero principal, luces. - revisar bounding (aterrizar todo el yate incluido instalación de ánodos) - mantenimiento a generador eléctrico - arreglo sistema eléctrico de ingreso de energía del exterior. - Organización todo sistema eléctrico completo, incluye cuarto de maquinas.',total:10000000,abonado:0,saldo:10000000,estado:'Pendiente',fase:'Fase 1'},
+{n:16,proveedor:'COMPRA TARJETAS ELECTRONICAS XENTA',tipo:'Mecánica — Sistemas',desc:'TARJETAS ELECTRONICAS XENTA - XENTA PT_VLT_03_P_01 (BABOR) - ⁠XENTA PT_VLT_03_S_01 (ESTRIBOR) - ⁠XENTA TH_ELC_01',total:0,abonado:0,saldo:0,estado:'Pendiente',fase:'Fase 1'},
+{n:17,proveedor:'AGUAS',tipo:'Plomería — Sistemas Agua',desc:'AGUAS - cambio de bomba de aguas negras dañada, revisar las otras bombas. - Revisión y mantenimiento todo el sistema de agua limpia, incluye duchas externas - Revisión y mantenimiento todas las bombas de achique.',total:10000000,abonado:0,saldo:10000000,estado:'Pendiente',fase:'Fase 1'},
+{n:18,proveedor:'AIRE ACONDICIONADO',tipo:'Climatización',desc:'MANTENIMIENTO SISTEMA AIRE ACONDICIONADO',total:10000000,abonado:0,saldo:10000000,estado:'Pendiente',fase:'Fase 1'},
+{n:19,proveedor:'AMAZON - LUCES SUBACUATICAS',tipo:'Otro',desc:'4 LUCES SUBACUATICAS',total:10884000,abonado:0,saldo:10884000,estado:'Aprobado',fase:'Fase 1'},
+{n:20,proveedor:'ASTILLERO SOFIMAR CARTAGENA SAS',tipo:'Otro',desc:'ALQUILER MONTACARGA SACADA Y METIDA AL AGUA',total:4000000,abonado:0,saldo:4000000,estado:'Pendiente',fase:'Fase 1'},
+{n:21,proveedor:'CARLOS ANDRES PEREZ TRUJILLO',tipo:'Otro',desc:'LETRAS DUSAMORE',total:100000,abonado:100000,saldo:0,estado:'Ejecutado',fase:'Fase 1'},
+{n:22,proveedor:'NATALIA CAPI',tipo:'Aseo',desc:'Plastico, cinta, la escobas, la palita',total:300000,abonado:300000,saldo:0,estado:'Ejecutado',fase:'Fase 1'},
+{n:23,proveedor:'TODOMAR ASEO',tipo:'Aseo',desc:'Implementos Aseo',total:530600,abonado:530600,saldo:0,estado:'Ejecutado',fase:'Fase 1'},
+{n:24,proveedor:'AQUATICA SURTIDOR NAUTICO SAS',tipo:'Aseo',desc:'Implementos Aseo',total:608423,abonado:608423,saldo:0,estado:'Ejecutado',fase:'Fase 1'},
+{n:25,proveedor:'ANTIFOULING',tipo:'Estructura / Casco',desc:'Pintura antifouling',total:15000000,abonado:0,saldo:15000000,estado:'Pendiente',fase:'Fase 1'},
+{n:26,proveedor:'Galvanizado ancla y cadena',tipo:'Estructura / Casco',desc:'Galvanizado ancla y cadena',total:1370000,abonado:680000,saldo:690000,estado:'En Ejecución',fase:'Fase 1'},
+{n:27,proveedor:'Quitar soldadura baranda',tipo:'Estructura / Casco',desc:'Quitar soldadura baranda',total:100000,abonado:100000,saldo:0,estado:'Ejecutado',fase:'Fase 1'},
+{n:28,proveedor:'Homecenter',tipo:'Compras varias',desc:'Compra Herramientas',total:1787500,abonado:1787500,saldo:0,estado:'Ejecutado',fase:'Fase 1'},
+{n:29,proveedor:'Compra Cabo de Segunda',tipo:'Estructura / Casco',desc:'Compra Cabo de Segunda',total:100000,abonado:100000,saldo:0,estado:'Ejecutado',fase:'Fase 1'}
+];
+const ABONOS=[
+{nombre:'Anticipo',condicion:'Docs propiedad verificados',comprometido:50000000,pagado:50000000,clase:'done',badge:'badge-done',icon:'✅',badgeLabel:'Completado'},
+{nombre:'Segundo Abono',condicion:'Docs + DIAN pagado',comprometido:250000000,pagado:18565000,clase:'partial',badge:'badge-partial',icon:'🟡',badgeLabel:'Parcial'},
+{nombre:'Tercer Abono',condicion:'Always Luxury SAS — Bcolombia 09800000161',comprometido:80000000,pagado:12000000,clase:'partial',badge:'badge-partial',icon:'🟡',badgeLabel:'Parcial'},
+{nombre:'Saldo Final',condicion:'45 días: registro polaco + Paz y Salvo',comprometido:300000000,pagado:0,clase:'pending',badge:'badge-pending',icon:'⬜',badgeLabel:'Pendiente'},
+{nombre:'Permiso DIMAR',condicion:'1 año bandera extranjera — cargo comprador',comprometido:6000000,pagado:0,clase:'pending',badge:'badge-pending',icon:'⬜',badgeLabel:'Pendiente'}
+];
+const COSTOS=[
+{nombre:'Marina + servicios marina',valor:2450000,obs:'Arriendo mensual puesto + electricidad, agua',color:'#1565C0'},
+{nombre:'Piloto (incl. seguridad social)',valor:4125435,obs:'Salario + prestaciones Decreto 1469/2025',color:'#E65100'},
+{nombre:'Ahorro mes mantenimientos',valor:3000000,obs:'Reserva preventivos y correctivos mensuales',color:'#F57F17'},
+{nombre:'Seguro del yate (prorrateado)',valor:3000000,obs:'Póliza casco + maquinaria + RC ÷ 12 meses',color:'#7B1FA2'},
+{nombre:'Administracion Yate LUXURY',valor:2500000,obs:'Always Luxury Experiences S.A.S.',color:'#2E7D32'}
+];
+
+const fmt=n=>n===0?'$0':'$'+Math.abs(n).toLocaleString('es-CO');
+const fmtS=n=>n<0?'-'+fmt(n):fmt(n);
+
+// ── Computed super-indicators ─────────────────────────────────────────────────
+const _totalEnEjecucion=WORKS.filter(w=>w.estado==='En Ejecución').reduce((s,w)=>s+w.total,0);
+const _totalPendiente=WORKS.filter(w=>w.estado==='Pendiente').reduce((s,w)=>s+w.total,0);
+const _totalEjecutadoWorks=WORKS.filter(w=>w.estado==='Ejecutado').reduce((s,w)=>s+w.abonado,0);
+const _COMPRA=686000000;
+const _PRES_TRAB=328250000;
+const _TOTAL_PRESUP=_COMPRA+_PRES_TRAB;
+const _totalAprobado=WORKS.filter(w=>w.estado==='Aprobado').reduce((s,w)=>s+w.total,0);
+const _TOTAL_EJEC=_COMPRA+_totalAprobado+_totalEnEjecucion+_totalEjecutadoWorks;
+
+document.getElementById('fecha-hoy').textContent='Actualizado: '+new Date().toLocaleDateString('es-CO',{day:'2-digit',month:'long',year:'numeric'});
+
+function showTab(id,el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  el.classList.add('active');
+}
+
+function buildAbonos(){
+  const grid=document.getElementById('abono-grid');
+  ABONOS.forEach(a=>{
+    const pct=a.comprometido>0?Math.min(100,Math.round(a.pagado/a.comprometido*100)):0;
+    const pend=a.comprometido-a.pagado;
+    const barColor=a.clase==='done'?'#2E7D32':a.clase==='partial'?'#F57F17':'#78909C';
+    grid.innerHTML+=`<div class="abono-card ${a.clase}">
+      <div class="abono-top"><div class="abono-name">${a.icon} ${a.nombre}</div><span class="abono-badge ${a.badge}">${a.badgeLabel}</span></div>
+      <div class="abono-numbers">
+        <div class="abono-num"><div class="lbl">Comprometido</div><div class="val comprometido">${fmt(a.comprometido)}</div></div>
+        <div class="abono-num"><div class="lbl">Pagado</div><div class="val pagado">${fmt(a.pagado)}</div></div>
+        <div class="abono-num"><div class="lbl">Pendiente</div><div class="val pendiente">${fmt(pend)}</div></div>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" style="width:${pct}%;background:${barColor}"></div></div>
+      <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:11px;color:#64748B"><span>${a.condicion}</span><strong>${pct}%</strong></div>
+    </div>`;
+  });
+}
+
+function estadoClass(e){return e==='Ejecutado'?'ep-ejecutado':e==='En Ejecución'?'ep-ejecucion':e==='Aprobado'?'ep-aprobado':'ep-pendiente';}
+
+function buildTable(data){
+  const body=document.getElementById('works-body');
+  body.innerHTML='';
+  let tot=0;
+  data.forEach(w=>{
+    tot+=w.total;
+    const sc=w.saldo<0?'color:#C62828':w.saldo===0?'color:#2E7D32':'';
+    body.innerHTML+=`<tr>
+      <td style="color:#94A3B8;font-weight:700">${w.n}</td>
+      <td style="max-width:150px;font-weight:600">${w.proveedor}</td>
+      <td><span class="tipo-chip">${w.tipo}</span></td>
+      <td><div class="desc-short" title="${w.desc.replace(/"/g,'&quot;')}">${w.desc}</div></td>
+      <td style="color:#64748B;font-size:11px">${w.fase}</td>
+      <td style="font-weight:700;white-space:nowrap">${w.total>0?fmt(w.total):'<span style="color:#94A3B8">Por cotizar</span>'}</td>
+      <td style="font-weight:700;white-space:nowrap;color:#2E7D32">${w.abonado>0?fmt(w.abonado):'—'}</td>
+      <td style="font-weight:700;white-space:nowrap;${sc}">${w.total>0?fmtS(w.saldo):'—'}</td>
+      <td><span class="estado-pill ${estadoClass(w.estado)}">${w.estado}</span></td>
+    </tr>`;
+  });
+  document.getElementById('rows-showing').textContent=data.length;
+  document.getElementById('total-filtrado').textContent='Total: '+fmt(tot);
+  ['Ejecutado','En Ejecución','Aprobado','Pendiente'].forEach(e=>{
+    const key=e==='En Ejecución'?'ejecucion':e.toLowerCase().replace(' ','');
+    const el=document.getElementById('cnt-'+key);
+    if(el)el.textContent=WORKS.filter(w=>w.estado===e).length;
+  });
+}
+
+function filterTable(){
+  const q=document.getElementById('search-works').value.toLowerCase();
+  const est=document.getElementById('filter-estado').value;
+  const tipo=document.getElementById('filter-tipo').value;
+  const fase=document.getElementById('filter-fase').value;
+  buildTable(WORKS.filter(w=>
+    (!q||w.proveedor.toLowerCase().includes(q)||w.desc.toLowerCase().includes(q)||w.tipo.toLowerCase().includes(q))&&
+    (!est||w.estado===est)&&(!tipo||w.tipo===tipo)&&(!fase||w.fase===fase)
+  ));
+}
+
+function buildCostos(){
+  const list=document.getElementById('costos-list');
+  COSTOS.forEach(c=>{
+    const pct=Math.round(c.valor/15075435*100);
+    list.innerHTML+=`<div class="costo-item">
+      <div class="costo-dot" style="background:${c.color}"></div>
+      <div style="flex:1"><div class="costo-nombre">${c.nombre}</div><div class="costo-obs">${c.obs}</div></div>
+      <div style="text-align:right"><div class="costo-valor">${fmt(c.valor)}</div><div style="font-size:11px;color:#94A3B8">${pct}% del total</div></div>
+    </div>`;
+  });
+}
+
+function buildCharts(){
+  Chart.defaults.font.family="'Segoe UI',system-ui,sans-serif";
+  const estadoTotals={Ejecutado:0,'En Ejecución':0,Aprobado:0,Pendiente:0};
+  WORKS.forEach(w=>{if(w.estado in estadoTotals)estadoTotals[w.estado]+=w.total;});
+  const _etLabels=Object.keys(estadoTotals);
+  const _etData=Object.values(estadoTotals);
+  const _etSum=_etData.reduce((a,b)=>a+b,0);
+  new Chart(document.getElementById('chartEstado'),{type:'doughnut',data:{labels:_etLabels,datasets:[{data:_etData,backgroundColor:['#2E7D32','#00838F','#F57F17','#7B1FA2'],borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:12}},tooltip:{callbacks:{label:function(c){const pct=_etSum>0?(c.raw/_etSum*100).toFixed(1):'0';const mM=(c.raw/1000000).toFixed(1);return ' '+c.label+' — $'+mM+'M ('+pct+'%)';}}}}}});
+
+  const tipoMap={};
+  WORKS.forEach(w=>{if(!tipoMap[w.tipo])tipoMap[w.tipo]=0;tipoMap[w.tipo]+=w.total;});
+  const ts=Object.entries(tipoMap).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
+  new Chart(document.getElementById('chartTipo'),{type:'bar',data:{labels:ts.map(([k])=>k),datasets:[{label:'Total ($)',data:ts.map(([,v])=>v),backgroundColor:'#1565C0',borderRadius:6}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt(c.raw)}}},scales:{x:{ticks:{callback:v=>'$'+(v/1000000).toFixed(0)+'M'},grid:{color:'#F1F5F9'}},y:{ticks:{font:{size:10}}}}}});
+
+  new Chart(document.getElementById('chartInversion'),{type:'bar',data:{labels:['Compra Yate','Trabajos presup.','Costos fijos año'],datasets:[{label:'Total',data:[686000000,328250000,180905220],backgroundColor:['#1565C0','#E65100','#F57F17'],borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt(c.raw)}}},scales:{y:{ticks:{callback:v=>'$'+(v/1000000).toFixed(0)+'M'},grid:{color:'#F1F5F9'}}}}});
+
+  new Chart(document.getElementById('chartAbonos'),{type:'bar',data:{labels:ABONOS.map(a=>a.nombre),datasets:[{label:'Comprometido',data:ABONOS.map(a=>a.comprometido),backgroundColor:'rgba(21,101,192,.25)',borderColor:'#1565C0',borderWidth:2,borderRadius:6},{label:'Pagado',data:ABONOS.map(a=>a.pagado),backgroundColor:'#2E7D32',borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{callbacks:{label:c=>' '+c.dataset.label+': '+fmt(c.raw)}}},scales:{y:{ticks:{callback:v=>'$'+(v/1000000).toFixed(0)+'M'},grid:{color:'#F1F5F9'}}}}});
+
+  new Chart(document.getElementById('chartCostos'),{type:'doughnut',data:{labels:COSTOS.map(c=>c.nombre),datasets:[{data:COSTOS.map(c=>c.valor),backgroundColor:COSTOS.map(c=>c.color),borderWidth:3,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:10}},tooltip:{callbacks:{label:c=>' '+fmt(c.raw)+'/mes'}}}}});
+
+  const meses=['May','Jun','Jul','Ago','Sep','Oct','Nov','Dic','Ene','Feb','Mar','Abr'];
+  new Chart(document.getElementById('chartProyeccion'),{type:'line',data:{labels:meses,datasets:[{label:'Costo fijo acumulado',data:meses.map((_,i)=>15075435*(i+1)),borderColor:'#1565C0',backgroundColor:'rgba(21,101,192,.08)',fill:true,tension:.4,pointBackgroundColor:'#1565C0',pointRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{callbacks:{label:c=>' '+fmt(c.raw)}}},scales:{y:{ticks:{callback:v=>'$'+(v/1000000).toFixed(0)+'M'},grid:{color:'#F1F5F9'}}}}});
+}
+
+// Fill super-indicators & new KPI cards
+document.getElementById('super-presupuestado').textContent=fmt(_TOTAL_PRESUP);
+document.getElementById('super-ejecutado').textContent=fmt(_TOTAL_EJEC);
+document.getElementById('kpi-val-ejecucion').textContent=fmt(_totalEnEjecucion);
+document.getElementById('kpi-val-pendiente').textContent=fmt(_totalPendiente);
+
+buildAbonos();buildTable(WORKS);buildCostos();buildCharts();
+</script>
+</body>
+</html>
