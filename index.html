@@ -227,7 +227,7 @@
 <!-- TRABAJOS -->
 <div id="sec-trabajos" class="section">
   <div class="kpi-grid" style="margin-bottom:20px">
-    <div class="kpi"><div class="kpi-label">📋 Total ítems</div><div class="kpi-value">29</div></div>
+    <div class="kpi"><div class="kpi-label">📋 Total ítems</div><div class="kpi-value" id="kpi-total-items">—</div></div>
     <div class="kpi green"><div class="kpi-label">⚡ Ejecutados</div><div class="kpi-value" id="cnt-ejecutado">—</div></div>
     <div class="kpi orange"><div class="kpi-label">🔄 En Ejecución</div><div class="kpi-value" id="cnt-ejecucion">—</div></div>
     <div class="kpi yellow"><div class="kpi-label">✅ Aprobados</div><div class="kpi-value" id="cnt-aprobado">—</div></div>
@@ -452,6 +452,7 @@ document.getElementById('super-ejecutado').textContent=fmt(_TOTAL_EJEC);
 document.getElementById('kpi-val-ejecucion').textContent=fmt(_totalEnEjecucion);
 document.getElementById('kpi-val-pendiente').textContent=fmt(_totalPendiente);
 
+document.getElementById('kpi-total-items').textContent=WORKS.length;
 buildAbonos();buildTable(WORKS);buildCostos();buildCharts();
 </script>
 </body>
