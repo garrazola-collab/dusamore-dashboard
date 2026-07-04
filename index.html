@@ -336,7 +336,7 @@ const _totalEnEjecucion=WORKS.filter(w=>w.estado==='En Ejecución').reduce((s,w)
 const _totalPendiente=WORKS.filter(w=>w.estado==='Pendiente').reduce((s,w)=>s+w.total,0);
 const _totalEjecutadoWorks=WORKS.filter(w=>w.estado==='Ejecutado').reduce((s,w)=>s+w.abonado,0);
 const _COMPRA=686000000;
-const _PRES_TRAB=365250000;
+const _PRES_TRAB=338250000;
 const _TOTAL_PRESUP=_COMPRA+_PRES_TRAB;
 const _totalAprobado=WORKS.filter(w=>w.estado==='Aprobado').reduce((s,w)=>s+w.total,0);
 const _TOTAL_EJEC=_COMPRA+_totalAprobado+_totalEnEjecucion+_totalEjecutadoWorks;
