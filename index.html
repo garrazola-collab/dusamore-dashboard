@@ -178,12 +178,12 @@
   </div>
   <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#64748B;margin-bottom:10px;margin-top:8px">TRABAJOS & REMODELACIÓN</div>
   <div class="kpi-grid">
-    <div class="kpi"><div class="kpi-label">🔧 Presupuesto Trabajos</div><div class="kpi-value">$338.250.000</div><div class="kpi-sub">Total estimado del proyecto</div></div>
-    <div class="kpi yellow"><div class="kpi-label">📋 Aprobado</div><div class="kpi-value">$132.404.973</div><div class="kpi-pct warn">39% del presupuesto</div></div>
-    <div class="kpi green"><div class="kpi-label">⚡ Ejecutado (pagado)</div><div class="kpi-value">$14.476.523</div><div class="kpi-pct ok">11% de lo aprobado</div></div>
+    <div class="kpi"><div class="kpi-label">🔧 Presupuesto Trabajos</div><div class="kpi-value" id="kpi-pres-trab">—</div><div class="kpi-sub">Total estimado del proyecto</div></div>
+    <div class="kpi yellow"><div class="kpi-label">📋 Aprobado</div><div class="kpi-value" id="kpi-aprobado">—</div><div class="kpi-pct warn" id="kpi-pct-aprobado">—</div></div>
+    <div class="kpi green"><div class="kpi-label">⚡ Ejecutado (pagado)</div><div class="kpi-value" id="kpi-ejecutado">—</div><div class="kpi-pct ok" id="kpi-pct-ejecutado">—</div></div>
     <div class="kpi teal"><div class="kpi-label">🔄 En Ejecución</div><div class="kpi-value" id="kpi-val-ejecucion">—</div><div class="kpi-sub">Trabajos activos actualmente</div></div>
     <div class="kpi purple"><div class="kpi-label">⏳ Pendientes</div><div class="kpi-value" id="kpi-val-pendiente">—</div><div class="kpi-sub">Por ejecutar / cotizar</div></div>
-    <div class="kpi orange"><div class="kpi-label">💰 Costos Fijos / Mes</div><div class="kpi-value">$15.075.435</div><div class="kpi-sub">Marina + Piloto + Seguros + Admin</div></div>
+    <div class="kpi orange"><div class="kpi-label">💰 Costos Fijos / Mes</div><div class="kpi-value" id="kpi-costos-mes">—</div><div class="kpi-sub">Marina + Piloto + Seguros + Admin</div></div>
   </div>
   <div class="charts-row">
     <div class="card"><h3>🔄 Trabajos por Estado</h3><div class="chart-wrap"><canvas id="chartEstado"></canvas></div></div>
@@ -194,8 +194,8 @@
       <h3>📅 Avance Global del Proyecto</h3>
       <div style="margin-bottom:14px">
         <div class="prog-item"><div class="prog-header"><span class="prog-label">Compra del Yate</span><span class="prog-pct">12%</span></div><div class="prog-bar"><div class="prog-fill" style="width:12%;background:#E65100"></div></div><div class="prog-detail">$80.565.000 pagados de $686.000.000</div></div>
-        <div class="prog-item"><div class="prog-header"><span class="prog-label">Trabajos Aprobados</span><span class="prog-pct">39%</span></div><div class="prog-bar"><div class="prog-fill" style="width:39%;background:#1565C0"></div></div><div class="prog-detail">$132.404.973 aprobados de $338.250.000</div></div>
-        <div class="prog-item"><div class="prog-header"><span class="prog-label">Trabajos Ejecutados</span><span class="prog-pct">11%</span></div><div class="prog-bar"><div class="prog-fill" style="width:11%;background:#2E7D32"></div></div><div class="prog-detail">$14.476.523 ejecutados de $132.404.973 aprobados</div></div>
+        <div class="prog-item"><div class="prog-header"><span class="prog-label">Trabajos Aprobados</span><span class="prog-pct" id="prog-pct-aprobado">—</span></div><div class="prog-bar"><div class="prog-fill" id="prog-fill-aprobado" style="width:0%;background:#1565C0"></div></div><div class="prog-detail" id="prog-detail-aprobado">—</div></div>
+        <div class="prog-item"><div class="prog-header"><span class="prog-label">Trabajos Ejecutados</span><span class="prog-pct" id="prog-pct-ejecutado">—</span></div><div class="prog-bar"><div class="prog-fill" id="prog-fill-ejecutado" style="width:0%;background:#2E7D32"></div></div><div class="prog-detail" id="prog-detail-ejecutado">—</div></div>
       </div>
     </div>
     <div class="card"><h3>💸 Distribución Inversión Total Proyecto</h3><div class="chart-wrap"><canvas id="chartInversion"></canvas></div></div>
@@ -251,8 +251,8 @@
 <!-- COSTOS FIJOS -->
 <div id="sec-costos" class="section">
   <div class="costo-total-bar">
-    <div><div class="lbl">Costo Fijo Total Mensual</div><div class="val">$15.075.435</div><div class="sub">Marina + Piloto + Fondo Mant. + Seguro + Admin</div></div>
-    <div style="text-align:right"><div class="lbl">Anualizado (12 meses)</div><div class="val">$180.905.220</div><div class="sub">Proyección sin incrementos</div></div>
+    <div><div class="lbl">Costo Fijo Total Mensual</div><div class="val" id="costo-total-mensual">—</div><div class="sub">Marina + Piloto + Fondo Mant. + Seguro + Admin</div></div>
+    <div style="text-align:right"><div class="lbl">Anualizado (12 meses)</div><div class="val" id="costo-total-anual">—</div><div class="sub">Proyección sin incrementos</div></div>
   </div>
   <div class="charts-row">
     <div>
@@ -324,7 +324,7 @@ const COSTOS=[
 {nombre:'Marina + servicios marina',valor:2450000,obs:'Arriendo mensual puesto + electricidad, agua',color:'#1565C0'},
 {nombre:'Piloto (incl. seguridad social)',valor:4125435,obs:'Salario + prestaciones Decreto 1469/2025',color:'#E65100'},
 {nombre:'Ahorro mes mantenimientos',valor:3000000,obs:'Reserva preventivos y correctivos mensuales',color:'#F57F17'},
-{nombre:'Seguro del yate (prorrateado)',valor:3000000,obs:'Póliza casco + maquinaria + RC ÷ 12 meses',color:'#7B1FA2'},
+{nombre:'Seguro del yate (prorrateado)',valor:3000000,obs:'Poliza casco + maquinaria + RC / 12 meses',color:'#7B1FA2'},
 {nombre:'Administracion Yate LUXURY',valor:2500000,obs:'Always Luxury Experiences S.A.S.',color:'#2E7D32'}
 ];
 
@@ -413,7 +413,7 @@ function filterTable(){
 function buildCostos(){
   const list=document.getElementById('costos-list');
   COSTOS.forEach(c=>{
-    const pct=Math.round(c.valor/15075435*100);
+    const pct=Math.round(c.valor/_totalCostos*100);
     list.innerHTML+=`<div class="costo-item">
       <div class="costo-dot" style="background:${c.color}"></div>
       <div style="flex:1"><div class="costo-nombre">${c.nombre}</div><div class="costo-obs">${c.obs}</div></div>
@@ -436,15 +436,41 @@ function buildCharts(){
   const ts=Object.entries(tipoMap).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
   new Chart(document.getElementById('chartTipo'),{type:'bar',data:{labels:ts.map(([k])=>k),datasets:[{label:'Total ($)',data:ts.map(([,v])=>v),backgroundColor:'#1565C0',borderRadius:6}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt(c.raw)}}},scales:{x:{ticks:{callback:v=>'$'+(v/1000000).toFixed(0)+'M'},grid:{color:'#F1F5F9'}},y:{ticks:{font:{size:10}}}}}});
 
-  new Chart(document.getElementById('chartInversion'),{type:'bar',data:{labels:['Compra Yate','Trabajos presup.','Costos fijos año'],datasets:[{label:'Total',data:[686000000,338250000,180905220],backgroundColor:['#1565C0','#E65100','#F57F17'],borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt(c.raw)}}},scales:{y:{ticks:{callback:v=>'$'+(v/1000000).toFixed(0)+'M'},grid:{color:'#F1F5F9'}}}}});
+  new Chart(document.getElementById('chartInversion'),{type:'bar',data:{labels:['Compra Yate','Trabajos presup.','Costos fijos año'],datasets:[{label:'Total',data:[_COMPRA,_PRES_TRAB,_totalCostos*12],backgroundColor:['#1565C0','#E65100','#F57F17'],borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt(c.raw)}}},scales:{y:{ticks:{callback:v=>'$'+(v/1000000).toFixed(0)+'M'},grid:{color:'#F1F5F9'}}}}});
 
   new Chart(document.getElementById('chartAbonos'),{type:'bar',data:{labels:ABONOS.map(a=>a.nombre),datasets:[{label:'Comprometido',data:ABONOS.map(a=>a.comprometido),backgroundColor:'rgba(21,101,192,.25)',borderColor:'#1565C0',borderWidth:2,borderRadius:6},{label:'Pagado',data:ABONOS.map(a=>a.pagado),backgroundColor:'#2E7D32',borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{callbacks:{label:c=>' '+c.dataset.label+': '+fmt(c.raw)}}},scales:{y:{ticks:{callback:v=>'$'+(v/1000000).toFixed(0)+'M'},grid:{color:'#F1F5F9'}}}}});
 
   new Chart(document.getElementById('chartCostos'),{type:'doughnut',data:{labels:COSTOS.map(c=>c.nombre),datasets:[{data:COSTOS.map(c=>c.valor),backgroundColor:COSTOS.map(c=>c.color),borderWidth:3,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:10}},tooltip:{callbacks:{label:c=>' '+fmt(c.raw)+'/mes'}}}}});
 
   const meses=['May','Jun','Jul','Ago','Sep','Oct','Nov','Dic','Ene','Feb','Mar','Abr'];
-  new Chart(document.getElementById('chartProyeccion'),{type:'line',data:{labels:meses,datasets:[{label:'Costo fijo acumulado',data:meses.map((_,i)=>15075435*(i+1)),borderColor:'#1565C0',backgroundColor:'rgba(21,101,192,.08)',fill:true,tension:.4,pointBackgroundColor:'#1565C0',pointRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{callbacks:{label:c=>' '+fmt(c.raw)}}},scales:{y:{ticks:{callback:v=>'$'+(v/1000000).toFixed(0)+'M'},grid:{color:'#F1F5F9'}}}}});
+  new Chart(document.getElementById('chartProyeccion'),{type:'line',data:{labels:meses,datasets:[{label:'Costo fijo acumulado',data:meses.map((_,i)=>_totalCostos*(i+1)),borderColor:'#1565C0',backgroundColor:'rgba(21,101,192,.08)',fill:true,tension:.4,pointBackgroundColor:'#1565C0',pointRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{callbacks:{label:c=>' '+fmt(c.raw)}}},scales:{y:{ticks:{callback:v=>'$'+(v/1000000).toFixed(0)+'M'},grid:{color:'#F1F5F9'}}}}});
 }
+
+// ── KPIs calculados desde WORKS (igual que Excel DETALLE) ──────────────────
+const _kpiEjecutado=WORKS.filter(w=>w.estado==='Ejecutado').reduce((s,w)=>s+w.abonado,0);
+const _kpiAprobado=WORKS.filter(w=>w.estado==='Aprobado'||w.estado==='En Ejecución').reduce((s,w)=>s+w.total,0)+_kpiEjecutado;
+const _totalCostos=COSTOS.reduce((s,c)=>s+c.valor,0);
+const _pctAprobado=_PRES_TRAB>0?Math.round(_kpiAprobado/_PRES_TRAB*100):0;
+const _pctEjecutado=_kpiAprobado>0?Math.round(_kpiEjecutado/_kpiAprobado*100):0;
+
+// Fill KPI cards
+document.getElementById('kpi-pres-trab').textContent=fmt(_PRES_TRAB);
+document.getElementById('kpi-aprobado').textContent=fmt(_kpiAprobado);
+document.getElementById('kpi-pct-aprobado').textContent=_pctAprobado+'% del presupuesto';
+document.getElementById('kpi-ejecutado').textContent=fmt(_kpiEjecutado);
+document.getElementById('kpi-pct-ejecutado').textContent=_pctEjecutado+'% de lo aprobado';
+document.getElementById('kpi-costos-mes').textContent=fmt(_totalCostos);
+document.getElementById('kpi-total-items').textContent=WORKS.length;
+// Costos tab totals
+document.getElementById('costo-total-mensual').textContent=fmt(_totalCostos);
+document.getElementById('costo-total-anual').textContent=fmt(_totalCostos*12);
+// Progress bars
+document.getElementById('prog-pct-aprobado').textContent=_pctAprobado+'%';
+document.getElementById('prog-fill-aprobado').style.width=_pctAprobado+'%';
+document.getElementById('prog-detail-aprobado').textContent=fmt(_kpiAprobado)+' aprobados de '+fmt(_PRES_TRAB);
+document.getElementById('prog-pct-ejecutado').textContent=_pctEjecutado+'%';
+document.getElementById('prog-fill-ejecutado').style.width=_pctEjecutado+'%';
+document.getElementById('prog-detail-ejecutado').textContent=fmt(_kpiEjecutado)+' ejecutados de '+fmt(_kpiAprobado)+' aprobados';
 
 // Fill super-indicators & new KPI cards
 document.getElementById('super-presupuestado').textContent=fmt(_TOTAL_PRESUP);
