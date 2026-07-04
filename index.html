@@ -178,7 +178,7 @@
   </div>
   <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#64748B;margin-bottom:10px;margin-top:8px">TRABAJOS & REMODELACIÓN</div>
   <div class="kpi-grid">
-    <div class="kpi"><div class="kpi-label">🔧 Presupuesto Trabajos</div><div class="kpi-value">$328.250.000</div><div class="kpi-sub">Total estimado del proyecto</div></div>
+    <div class="kpi"><div class="kpi-label">🔧 Presupuesto Trabajos</div><div class="kpi-value">$338.250.000</div><div class="kpi-sub">Total estimado del proyecto</div></div>
     <div class="kpi yellow"><div class="kpi-label">📋 Aprobado</div><div class="kpi-value">$132.404.973</div><div class="kpi-pct warn">39% del presupuesto</div></div>
     <div class="kpi green"><div class="kpi-label">⚡ Ejecutado (pagado)</div><div class="kpi-value">$14.476.523</div><div class="kpi-pct ok">11% de lo aprobado</div></div>
     <div class="kpi teal"><div class="kpi-label">🔄 En Ejecución</div><div class="kpi-value" id="kpi-val-ejecucion">—</div><div class="kpi-sub">Trabajos activos actualmente</div></div>
@@ -436,7 +436,7 @@ function buildCharts(){
   const ts=Object.entries(tipoMap).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
   new Chart(document.getElementById('chartTipo'),{type:'bar',data:{labels:ts.map(([k])=>k),datasets:[{label:'Total ($)',data:ts.map(([,v])=>v),backgroundColor:'#1565C0',borderRadius:6}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt(c.raw)}}},scales:{x:{ticks:{callback:v=>'$'+(v/1000000).toFixed(0)+'M'},grid:{color:'#F1F5F9'}},y:{ticks:{font:{size:10}}}}}});
 
-  new Chart(document.getElementById('chartInversion'),{type:'bar',data:{labels:['Compra Yate','Trabajos presup.','Costos fijos año'],datasets:[{label:'Total',data:[686000000,328250000,180905220],backgroundColor:['#1565C0','#E65100','#F57F17'],borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt(c.raw)}}},scales:{y:{ticks:{callback:v=>'$'+(v/1000000).toFixed(0)+'M'},grid:{color:'#F1F5F9'}}}}});
+  new Chart(document.getElementById('chartInversion'),{type:'bar',data:{labels:['Compra Yate','Trabajos presup.','Costos fijos año'],datasets:[{label:'Total',data:[686000000,338250000,180905220],backgroundColor:['#1565C0','#E65100','#F57F17'],borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt(c.raw)}}},scales:{y:{ticks:{callback:v=>'$'+(v/1000000).toFixed(0)+'M'},grid:{color:'#F1F5F9'}}}}});
 
   new Chart(document.getElementById('chartAbonos'),{type:'bar',data:{labels:ABONOS.map(a=>a.nombre),datasets:[{label:'Comprometido',data:ABONOS.map(a=>a.comprometido),backgroundColor:'rgba(21,101,192,.25)',borderColor:'#1565C0',borderWidth:2,borderRadius:6},{label:'Pagado',data:ABONOS.map(a=>a.pagado),backgroundColor:'#2E7D32',borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{callbacks:{label:c=>' '+c.dataset.label+': '+fmt(c.raw)}}},scales:{y:{ticks:{callback:v=>'$'+(v/1000000).toFixed(0)+'M'},grid:{color:'#F1F5F9'}}}}});
 
